@@ -1,105 +1,209 @@
-================================================================
-QUICK REVISION SHEET -- Inheritance in C++
-================================================================
 
-CORE IDEA
----------
-Inheritance lets one class (derived) reuse and extend another
-class (base). The derived class gets all public/protected members
-of the base automatically.
+// ================================================================
 
-  Car IS-A Vehicle      <-- valid "is-a" => use inheritance
-  Car HAS-A Engine      <-- "has-a" => use a member variable
+// Lab: Inheritance in C++
 
-WHY IT MATTERS
---------------
-- Avoid repeating common data (make, year, fuelLevel live once)
-- Model real-world hierarchies cleanly
-- Enable polymorphism: one pointer type, many behaviors
+// Course: Object-Oriented Programming for Engineers
 
+// File: MainProgram.cpp
 
-KEY SYNTAX AT A GLANCE
------------------------
+// ================================================================
 
-  // Base class
-  class Vehicle {
-  protected:
-      std::string make;   // accessible in derived classes
-      int year;
-  public:
-      Vehicle(std::string m, int y) : make(m), year(y) {}
-      virtual std::string describe() const = 0;  // pure virtual
-      virtual ~Vehicle() = default;              // always add!
-  };
+// INSTRUCTIONS:
 
-  // Derived class
-  class Car : public Vehicle {
-  private:
-      int doors;
-  public:
-      // Chain to base constructor via initialiser list
-      Car(std::string m, int y, int d) : Vehicle(m, y), doors(d) {}
+//   Complete every TODO. Do NOT change function signatures.
 
-      std::string describe() const override {
-          return "Car: " + make + ", " + std::to_string(doors) + "d";
-      }
-  };
+//   All code stays in this single file. No .h files allowed.
 
+// ================================================================
 
-KEY RULES (memorise these)
---------------------------
-1. Use  : public Base  for "is-a" inheritance.
-2. Call base constructor in initialiser list:
-     Car(...) : Vehicle(make, year), doors(d) {}
-3. Mark base methods  virtual  to enable overriding.
-4. Add  = 0  for pure virtual (forces derived to implement it).
-5. Always add  virtual ~Vehicle() = default;  to base class.
-6. Use  override  in derived -- catches typo bugs at compile time.
+#include <iostream>
 
+#include <string>
 
-PROTECTED vs PRIVATE
---------------------
-  protected  --> accessible inside the class AND derived classes
-  private    --> NOT accessible in derived classes (use getters)
+#include <sstream>
 
+#include <iomanip>
 
-PURE VIRTUAL (= 0) QUICK FACTS
---------------------------------
-  virtual std::string describe() const = 0;
+// ================================================================
 
-  - Vehicle becomes ABSTRACT (cannot create Vehicle objects)
-  - Every derived class MUST implement describe()
-  - Forgetting = 0 means Vehicle is not abstract (usually a bug)
+// CLASS DEFINITIONS
 
+// ================================================================
 
-POLYMORPHISM IN 3 LINES
-------------------------
-  Car c("Toyota", 2020, 4);
-  Vehicle* v = &c;          // base pointer to derived object
-  v->describe();            // calls Car::describe() at runtime!
-  
-  This ONLY works because describe() is virtual.
+// ----------------------------------------------------------------
 
+// Base Class: Vehicle
 
-OSTRINGSTREAM FOR describe()
------------------------------
-  #include <sstream>
+// ----------------------------------------------------------------
 
-  std::string describe() const {
-      std::ostringstream oss;
-      oss << "Car: " << make << " (" << year << "), "
-          << doors << " doors, fuel: " << fuelLevel << "%";
-      return oss.str();
-  }
+class Vehicle {
 
+protected:
 
-QUICK CHECKLIST BEFORE YOU START CODING
------------------------------------------
-[ ] Vehicle has: protected data members?
-[ ] Vehicle has: virtual describe() = 0 ?
-[ ] Vehicle has: virtual ~Vehicle() = default ?
-[ ] Car/Truck constructors chain to Vehicle in initialiser list?
-[ ] Car/Truck describe() has the  override  keyword?
-[ ] refuel() ignores zero/negative AND clamps at 100?
+    std::string make;
 
-================================================================
+    int year;
+
+    double fuelLevel;
+
+public:
+
+    // Constructor implementation
+
+    Vehicle(std::string make, int year, double fuelLevel)
+
+        : make(make), year(year), fuelLevel(fuelLevel) {}
+
+    // Getters implementation (const)
+
+    std::string getMake() const { return make; }
+
+    int getYear() const { return year; }
+
+    double getFuelLevel() const { return fuelLevel; }
+
+    // refuel implementation
+
+    void refuel(double amount) {
+
+        if (amount <= 0) return;
+
+        fuelLevel += amount;
+
+        if (fuelLevel > 100.0) {
+
+            fuelLevel = 100.0;
+
+        }
+
+    }
+
+    // Pure virtual describe() and virtual destructor
+
+    virtual std::string describe() const = 0;
+
+    virtual ~Vehicle() = default;
+
+};
+
+// ----------------------------------------------------------------
+
+// Derived Class: Car
+
+// ----------------------------------------------------------------
+
+class Car : public Vehicle {
+
+private:
+
+    int numDoors;
+
+public:
+
+    // Constructor with chaining to Vehicle
+
+    Car(std::string make, int year, double fuelLevel, int numDoors)
+
+        : Vehicle(make, year, fuelLevel), numDoors(numDoors) {}
+
+    // Getter implementation
+
+    int getNumDoors() const { return numDoors; }
+
+    // describe() override with formatted output
+
+    std::string describe() const override {
+
+        std::ostringstream oss;
+
+        oss << std::fixed << std::setprecision(1);
+
+        oss << "Car: " << make << " (" << year << "), " 
+<< numDoors << " doors, fuel: " << fuelLevel << "%";
+
+        return oss.str();
+
+    }
+
+};
+
+// ----------------------------------------------------------------
+
+// Derived Class: Truck
+
+// ----------------------------------------------------------------
+
+class Truck : public Vehicle {
+
+private:
+
+    double payloadTons;
+
+public:
+
+    // Constructor with chaining to Vehicle
+
+    Truck(std::string make, int year, double fuelLevel, double payloadTons)
+
+        : Vehicle(make, year, fuelLevel), payloadTons(payloadTons) {}
+
+    // Getter implementation
+
+    double getPayloadTons() const { return payloadTons; }
+
+    // describe() override with formatted output
+
+    std::string describe() const override {
+
+        std::ostringstream oss;
+
+        oss << std::fixed << std::setprecision(1);
+
+        oss << "Truck: " << make << " (" << year << "), payload: " 
+<< payloadTons << "t, fuel: " << fuelLevel << "%";
+
+        return oss.str();
+
+    }
+
+};
+
+// ================================================================
+
+// MAIN
+
+// ================================================================
+
+int main() {
+
+    // --- Basic usage demo ---
+
+    Car   c("Toyota", 2020, 75.5, 4);
+
+    Truck t("Ford",   2018, 60.0, 5.5);
+
+    std::cout << c.describe() << "\n";
+
+    std::cout << t.describe() << "\n";
+
+    // Polymorphism via base pointer
+
+    Vehicle* v1 = &c;
+
+    Vehicle* v2 = &t;
+
+    std::cout << v1->describe() << "\n";
+
+    std::cout << v2->describe() << "\n";
+
+    // Refuel demo
+
+    c.refuel(20.0);
+
+    std::cout << "After refuel: " << c.getFuelLevel() << "%\n";
+
+    return 0;
+
+}
+ 
